@@ -48,7 +48,6 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
-
     //onBackPressed
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
