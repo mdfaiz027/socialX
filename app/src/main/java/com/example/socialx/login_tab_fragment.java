@@ -1,8 +1,12 @@
 package com.example.socialx;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -15,7 +19,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.regex.Pattern;
 
@@ -25,6 +34,13 @@ public class login_tab_fragment extends Fragment {
     EditText email, password;
     TextView forgotPassword, googleSignIn, fbSignIn, registerNow, login;
 
+    FirebaseAuth firebaseAuth;
+    ProgressDialog progressDialog;
+
+    private String emailInput, passwordInput;
+
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^" +
@@ -49,6 +65,15 @@ public class login_tab_fragment extends Fragment {
 
         fragment_layout = view.findViewById(R.id.fragment_layout);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        progressDialog = new ProgressDialog(getContext());
+        progressDialog.setCancelable(false);
+
+
+        sharedPreferences = getContext().getSharedPreferences("LOGIN", Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+
         registerNow.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -59,7 +84,7 @@ public class login_tab_fragment extends Fragment {
             }
         });
 
-        googleSignIn.setOnClickListener(new View.OnClickListener() {
+/*        googleSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                Toast.makeText(getContext(), "Google Clicked", Toast.LENGTH_SHORT).show();
@@ -71,55 +96,64 @@ public class login_tab_fragment extends Fragment {
             public void onClick(View view) {
 //                Toast.makeText(getContext(), "Facebook Clicked", Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                if (!validateEmail() | !validatePassword()) {
+/*                if (!validateEmail() | !validatePassword()) {
                     return;
-                }
+                }*/
 
-                // if the email and password matches, a toast message
-                // with email and password is displayed
-//                String input = "Email: " + email.getText().toString();
-//                input += "\n";
-//                input += "Password: " + password.getText().toString();
-//                Toast.makeText(getActivity(), ""+input, Toast.LENGTH_SHORT).show();
-
-                Intent intent = new Intent(getContext(), HomeActivity.class);
-                startActivity(intent);
+                checkUser();
             }
         });
 
         return view;
     }
 
-    private boolean validatePassword() {
+    private void checkUser() {
 
-        // Extract input from EditText
-        String emailInput = email.getText().toString().trim();
+        progressDialog.show();
+        progressDialog.setMessage("loading....");
 
-        // if the email input field is empty
-        if (emailInput.isEmpty()) {
-            email.setError("Field can not be empty");
-            return false;
-        }
+        emailInput = email.getText().toString();
+        passwordInput = password.getText().toString();
 
-        // Matching the input email to a predefined email pattern
-        else if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
-            email.setError("Please enter a valid email address");
-            return false;
-        } else {
-            email.setError(null);
-            return true;
-        }
+        firebaseAuth.signInWithEmailAndPassword(emailInput,passwordInput).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                progressDialog.dismiss();
+
+                if(!task.isSuccessful()){
+                    Toast.makeText(getContext(), ""+task.getException(), Toast.LENGTH_SHORT).show();
+                }else{
+
+                    editor.putString("usermail", emailInput);
+                    editor.putBoolean("status", true);
+                    editor.commit();
+
+                    Intent intent = new Intent(getContext(), HomeActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(getContext(), "Successfully Logged In", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                progressDialog.dismiss();
+
+                Toast.makeText(getContext(), ""+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
-    private boolean validateEmail() {
+/*    private boolean validatePassword() {
 
-        String passwordInput = password.getText().toString().trim();
+        passwordInput = password.getText().toString().trim();
         // if password field is empty
         // it will display error message "Field can not be empty"
         if (passwordInput.isEmpty()) {
@@ -136,6 +170,37 @@ public class login_tab_fragment extends Fragment {
             password.setError(null);
             return true;
         }
+    }
 
+    private boolean validateEmail() {
+
+        // Extract input from EditText
+        emailInput = email.getText().toString().trim();
+
+        // if the email input field is empty
+        if (emailInput.isEmpty()) {
+            email.setError("Field can not be empty");
+            return false;
+        }
+
+        // Matching the input email to a predefined email pattern
+        else if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
+            email.setError("Please enter a valid email address");
+            return false;
+        } else {
+            email.setError(null);
+            return true;
+        }
+    }*/
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if(sharedPreferences.getBoolean("status", false) == true){
+            startActivity(new Intent(getContext(), HomeActivity.class));
+        }else{
+            Toast.makeText(getContext(), "Please login", Toast.LENGTH_SHORT).show();
+        }
     }
 }
