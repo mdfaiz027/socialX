@@ -11,5 +11,12 @@
     <color name="gray">#808080</color>
     <color name="light_gray">#D3D3D3</color>
 
+    //my colors
     <color name="my_color">#BFD6EC</color>
+    <color name="cobalt_blue">#2b80b8</color>
+    <color name="custom_border">#bbbbbb</color>
+    <color name="blue">#1968b3</color>
+
+    <color name="published_at_color">#bababa</color>
+    <color name="source_color">#a5a5a5</color>
 </resources>

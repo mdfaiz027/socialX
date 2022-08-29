@@ -59,6 +59,7 @@ public class signup_tab_fragment extends Fragment {
 
         name = view.findViewById(R.id.idETNameField);
         email = view.findViewById(R.id.idETEmailField);
+        cpp = view.findViewById(R.id.ccp);
         phone_number = view.findViewById(R.id.phone_number_edt);
         password = view.findViewById(R.id.idPasswordEditText);
         signIn = view.findViewById(R.id.idSignIn);
@@ -80,14 +81,22 @@ public class signup_tab_fragment extends Fragment {
             }
         });
 
-
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-/*                if (!validateName() | !validateEmail() | !validatePassword() | !validatePhoneNumber()) {
+                if (!validateName()) {
                     return;
-                }*/
+                }else if(!validateEmail()){
+                    return;
+                }else if(!validatePhoneNumber()){
+                    return;
+                }else if(!validatePassword()){
+                    return;
+                }else if(!checkBox.isChecked()){
+                    Toast.makeText(getContext(), "Please agree with the terms and conditions", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 createUser();
             }
         });
@@ -95,18 +104,20 @@ public class signup_tab_fragment extends Fragment {
         return view;
     }
 
-/*    private boolean validatePhoneNumber() {
+    private boolean validateName() {
 
-        phone_numberInput = phone_number.getText().toString().trim();
-        if(phone_numberInput.length() == 10){
-            return  true;
-        }else {
-            phone_number.setError("Enter a correct mobile number");
-            return  false;
+        nameInput = name.getText().toString();
+
+        if(nameInput.matches("^[\\p{L} .'-]+$")){
+            return true;
+        }else{
+            name.setError("Enter a valid name!");
+            return false;
         }
+
     }
 
-    private boolean validatePassword() {
+    private boolean validateEmail() {
 
         // Extract input from EditText
         emailInput = email.getText().toString().trim();
@@ -119,7 +130,7 @@ public class signup_tab_fragment extends Fragment {
 
         // Matching the input email to a predefined email pattern
         else if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
-            email.setError("Enter a valid email address");
+            email.setError("Please enter a valid email address");
             return false;
         } else {
             email.setError(null);
@@ -128,7 +139,18 @@ public class signup_tab_fragment extends Fragment {
 
     }
 
-    private boolean validateEmail() {
+    private boolean validatePhoneNumber() {
+
+        phone_numberInput = phone_number.getText().toString().trim();
+        if(phone_numberInput.length() == 10){
+            return  true;
+        }else {
+            phone_number.setError("Enter a correct mobile number");
+            return  false;
+        }
+    }
+
+    private boolean validatePassword() {
 
         passwordInput = password.getText().toString().trim();
         // if password field is empty
@@ -147,21 +169,7 @@ public class signup_tab_fragment extends Fragment {
             password.setError(null);
             return true;
         }
-
     }
-
-    private boolean validateName() {
-
-        nameInput = name.getText().toString();
-
-        if(nameInput.matches("^[A-Za-z]+$")){
-            return true;
-        }else{
-            name.setError("Enter a valid name!");
-            return false;
-        }
-
-    }*/
 
     private void createUser() {
 
@@ -177,7 +185,7 @@ public class signup_tab_fragment extends Fragment {
                 progressDialog.dismiss();
 
                 if(!task.isSuccessful()){
-                    Toast.makeText(getContext(), ""+task.getException(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getContext(), ""+task.getException(), Toast.LENGTH_SHORT).show();
                 }else{
                     editor.putString("usermail", emailInput);
                     editor.putBoolean("status", true);

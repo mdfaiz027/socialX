@@ -102,9 +102,11 @@ public class login_tab_fragment extends Fragment {
             @Override
             public void onClick(View view) {
 
-/*                if (!validateEmail() | !validatePassword()) {
+                if (!validateEmail()) {
                     return;
-                }*/
+                }else if(!validatePassword()){
+                    return;
+                }
 
                 checkUser();
             }
@@ -127,7 +129,7 @@ public class login_tab_fragment extends Fragment {
                 progressDialog.dismiss();
 
                 if(!task.isSuccessful()){
-                    Toast.makeText(getContext(), ""+task.getException(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(getContext(), ""+task.getException(), Toast.LENGTH_SHORT).show();
                 }else{
 
                     editor.putString("usermail", emailInput);
@@ -151,7 +153,28 @@ public class login_tab_fragment extends Fragment {
 
     }
 
-/*    private boolean validatePassword() {
+    private boolean validateEmail() {
+
+        // Extract input from EditText
+        emailInput = email.getText().toString().trim();
+
+        // if the email input field is empty
+        if (emailInput.isEmpty()) {
+            email.setError("Field can not be empty");
+            return false;
+        }
+
+        // Matching the input email to a predefined email pattern
+        else if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
+            email.setError("Please enter a valid email address");
+            return false;
+        } else {
+            email.setError(null);
+            return true;
+        }
+    }
+
+    private boolean validatePassword() {
 
         passwordInput = password.getText().toString().trim();
         // if password field is empty
@@ -172,35 +195,15 @@ public class login_tab_fragment extends Fragment {
         }
     }
 
-    private boolean validateEmail() {
-
-        // Extract input from EditText
-        emailInput = email.getText().toString().trim();
-
-        // if the email input field is empty
-        if (emailInput.isEmpty()) {
-            email.setError("Field can not be empty");
-            return false;
-        }
-
-        // Matching the input email to a predefined email pattern
-        else if (!Patterns.EMAIL_ADDRESS.matcher(emailInput).matches()) {
-            email.setError("Please enter a valid email address");
-            return false;
-        } else {
-            email.setError(null);
-            return true;
-        }
-    }*/
-
     @Override
     public void onStart() {
         super.onStart();
 
         if(sharedPreferences.getBoolean("status", false) == true){
             startActivity(new Intent(getContext(), HomeActivity.class));
-        }else{
-            Toast.makeText(getContext(), "Please login", Toast.LENGTH_SHORT).show();
         }
+/*        else{
+            Toast.makeText(getContext(), "Please login", Toast.LENGTH_SHORT).show();
+        }*/
     }
 }

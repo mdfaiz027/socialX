@@ -221,7 +221,7 @@
                 android:layout_marginLeft="5dp"
                 android:layout_toEndOf="@id/idIAgreeWith"
                 android:layout_weight="1.5"
-                android:text="term_and_condition"
+                android:text="@string/terms"
                 android:textColor="@color/red"
                 android:textSize="16sp"
                 android:textStyle="bold" />
