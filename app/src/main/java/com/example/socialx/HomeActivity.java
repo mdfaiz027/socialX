@@ -2,6 +2,7 @@ package com.example.socialx;
 
 import static java.util.TimeZone.getTimeZone;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,6 +28,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,6 +63,12 @@ public class HomeActivity extends AppCompatActivity {
     RequestQueue queue;
     ProgressDialog progressDialog;
 
+    FirebaseAuth auth = FirebaseAuth.getInstance();
+
+    GoogleSignInOptions gso;
+    GoogleSignInClient gsc;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,12 +95,30 @@ public class HomeActivity extends AppCompatActivity {
 
         queue = Volley.newRequestQueue(this);
 
+        email = auth.getCurrentUser().getEmail();
+        mail.setText(""+email);
+
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        gsc = GoogleSignIn.getClient(this, gso);
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
+        if(account!=null){
+            String emailStr = account.getEmail();
+            mail.setText(emailStr);
+        }
+
         loadData();
 
         //Logout functionality
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                //Using Shared Preferences
                 sharedPreferences = getSharedPreferences("LOGIN", Context.MODE_PRIVATE);
                 editor = sharedPreferences.edit();
                 editor.clear();
@@ -94,6 +126,20 @@ public class HomeActivity extends AppCompatActivity {
                 finish();
 
                 startActivity(new Intent(HomeActivity.this, MainActivity.class));
+
+                //Firebase logout
+                signout();
+
+            }
+        });
+    }
+
+    private void signout() {
+        gsc.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                startActivity(new Intent(HomeActivity.this, MainActivity.class));
+                finish();
             }
         });
     }
@@ -162,6 +208,4 @@ public class HomeActivity extends AppCompatActivity {
 
         return false;
     }
-
-
 }

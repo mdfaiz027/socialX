@@ -7,10 +7,11 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Patterns;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,28 +20,40 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthCredential;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.regex.Pattern;
 
-public class login_tab_fragment extends Fragment {
+public class login_tab_fragment extends Fragment{
 
     LinearLayout fragment_layout;
     EditText email, password;
     TextView forgotPassword, googleSignIn, fbSignIn, registerNow, login;
 
-    FirebaseAuth firebaseAuth;
     ProgressDialog progressDialog;
 
     private String emailInput, passwordInput;
 
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+
+    FirebaseAuth firebaseAuth;
+
+    GoogleSignInOptions gso;
+    GoogleSignInClient gsc;
 
     private static final Pattern PASSWORD_PATTERN =
             Pattern.compile("^" +
@@ -65,14 +78,19 @@ public class login_tab_fragment extends Fragment {
 
         fragment_layout = view.findViewById(R.id.fragment_layout);
 
-        firebaseAuth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(getContext());
         progressDialog.setCancelable(false);
-
 
         sharedPreferences = getContext().getSharedPreferences("LOGIN", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+
+        gsc = GoogleSignIn.getClient(getContext(), gso);
 
         registerNow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,14 +102,14 @@ public class login_tab_fragment extends Fragment {
             }
         });
 
-/*        googleSignIn.setOnClickListener(new View.OnClickListener() {
+        googleSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Toast.makeText(getContext(), "Google Clicked", Toast.LENGTH_SHORT).show();
+                signIn();
             }
         });
 
-        fbSignIn.setOnClickListener(new View.OnClickListener() {
+/*        fbSignIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 //                Toast.makeText(getContext(), "Facebook Clicked", Toast.LENGTH_SHORT).show();
@@ -115,6 +133,31 @@ public class login_tab_fragment extends Fragment {
         return view;
     }
 
+    private void signIn() {
+        Intent intent = gsc.getSignInIntent();
+        startActivityForResult(intent, 100);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 100){
+            Task<GoogleSignInAccount>  task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                task.getResult(ApiException.class);
+                navigateToHomeActivity();
+            } catch (ApiException e) {
+                Toast.makeText(getContext(), ""+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void navigateToHomeActivity() {
+        Intent intent = new Intent(getContext(), HomeActivity.class);
+        startActivity(intent);
+        Toast.makeText(getContext(), "Successfully Logged In", Toast.LENGTH_SHORT).show();
+    }
+
     private void checkUser() {
 
         progressDialog.show();
@@ -136,10 +179,8 @@ public class login_tab_fragment extends Fragment {
                     editor.putBoolean("status", true);
                     editor.commit();
 
-                    Intent intent = new Intent(getContext(), HomeActivity.class);
-                    startActivity(intent);
-                    Toast.makeText(getContext(), "Successfully Logged In", Toast.LENGTH_SHORT).show();
-                }
+                    navigateToHomeActivity();
+                    }
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -202,8 +243,14 @@ public class login_tab_fragment extends Fragment {
         if(sharedPreferences.getBoolean("status", false) == true){
             startActivity(new Intent(getContext(), HomeActivity.class));
         }
-/*        else{
-            Toast.makeText(getContext(), "Please login", Toast.LENGTH_SHORT).show();
-        }*/
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
+
+        if(account!=null){
+            Intent intent = new Intent(getContext(), HomeActivity.class);
+            startActivity(intent);
+        }
+
     }
+
 }
