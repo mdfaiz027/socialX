@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:background="@drawable/border"
+    android:orientation="horizontal"
+    android:layout_margin="5dp"
+    android:gravity="center"
+    android:weightSum="5">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3.8"
+        android:orientation="vertical"
+        android:paddingStart="15dp"
+        android:paddingTop="5dp"
+        android:paddingEnd="15dp"
+        android:paddingBottom="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/published_at"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Published At"
+                android:textSize="12sp"
+                android:textColor="@color/published_at_color"
+                android:layout_marginEnd="5dp"/>
+
+            <TextView
+                android:id="@+id/source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Source"
+                android:textSize="12sp"
+                android:textColor="@color/source_color"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Title"
+            android:maxLines="2"
+            android:textSize="14sp"
+            android:textColor="@color/cobalt_blue"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:maxLines="2"
+            android:textSize="12sp"
+            android:text="Description"
+            android:textColor="@color/cobalt_blue"/>
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginEnd="10dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="1.2">
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:src="@drawable/image"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
